@@ -21,7 +21,7 @@
 1-3.选择硬盘上的jar包
 1-4.Apply -> OK
 
-#### 2、pom文件导入一下依赖包
+#### 2、pom文件导入以下依赖包
 
 ```
  <properties>
@@ -99,12 +99,19 @@
 
 spring boot 启动类添加@MapperScan("**gedi.log.mapper**")配置，且**gedi.log.mapper**是固定的，不可修改。
 
-3-2 在application.properties文件或application.yml文件添加一下配置
+3-2 添加@SpringBootApplication(scanBasePackages = {"gedi.log","gedi.logdemo"})
+
+**@SpringBootApplication(scanBasePackages = {"gedi.log","gedi.logdemo"})**配置，**gedi.log**是该jar包的目录，是必须的，不可改的，**gedi.logdemo**是开发者的项目目录
+
+3-3 添加配置项到配置文件
+
+在application.properties文件或application.yml文件添加以下配置，该属性必须的用户登录时使用的账号属性字段，例如，你的账号字段为private String username；则下面的配置文件的属性为username，如果你的账号字段为private String account；则下面的配置文件的属性为account.第二个配置项是登录接口的方法名称。
 
 application.properties 添加
 
 ```properties
 login.username=username
+login.methodName=login
 ```
 
 application.yml
@@ -112,6 +119,7 @@ application.yml
 ```yml
 login:
   username: username
+  methodName: login
 ```
 
 这一步的目的是方便**@MyUserInfo**获取根据配置文件的用户名的值，保存到session中，为之后的**@OperationLogAspect**作准备。
@@ -120,7 +128,7 @@ login:
 
 主要使用的注解有两个**@MyUserInfo**和**@OperationLogAspect**，也是该模块的主要内容。
 
-4-1 如何使用
+如何使用？
 
 **登录接口使用**
 
@@ -134,6 +142,50 @@ login:
 
 
 
+#### 5、创建**OPERATION_LOG表**
 
+5-1、oracle数据库
+
+```sql
+CREATE TABLE "OPERATION_LOG" (
+  "OPERATION_ID" VARCHAR2(255 CHAR) NOT NULL ,
+  "DESCRIPTION" VARCHAR2(255 CHAR) ,
+  "IP" VARCHAR2(255 CHAR) ,
+  "OPERATION_METHOD" VARCHAR2(255 CHAR) ,
+  "OPERATION_MODEL" VARCHAR2(255 CHAR) ,
+  "OPERATION_NAME" VARCHAR2(255 CHAR) ,
+  "OPERATION_TIME" TIMESTAMP(6) ,
+  "OPERATION_TYPE" VARCHAR2(255 CHAR) ,
+  "USER_NAME" VARCHAR2(255 CHAR) 
+);
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_ID" IS '操作ID';
+COMMENT ON COLUMN "OPERATION_LOG"."DESCRIPTION" IS '描述';
+COMMENT ON COLUMN "OPERATION_LOG"."IP" IS 'IP';
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_METHOD" IS '操作的方法';
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_MODEL" IS '操作的模块';
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_NAME" IS '操作名称';
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_TIME" IS '操作时间';
+COMMENT ON COLUMN "OPERATION_LOG"."OPERATION_TYPE" IS '操作类型';
+COMMENT ON COLUMN "OPERATION_LOG"."USER_NAME" IS '操作者';
+```
+
+5-2、mysql数据库
+
+```sql
+create table `operation_log` (
+        `operation_id` varchar(255)  primary key not null comment '操作id',
+        `description` varchar(255)  default null comment '描述',
+        `ip` varchar(128)  default null comment 'ip',
+        `operation_method` varchar(255)  default null comment '操作的方法',
+        `operation_model` varchar(255)  default null comment '操作的模块',
+        `operation_name` varchar(255)  default null comment '操作名称',
+        `operation_time` timestamp(6) null default null comment '操作时间',
+        `operation_type` varchar(255)  default null comment '操作类型',
+        `user_name` varchar(255)  default null comment '操作者'
+        ) ;
+```
+
+其他数据库也类似。
 
 ##### 使用说明到此结束！！！！
+
